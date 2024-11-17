@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+ body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      overflow: hidden;
+    }
+
+    #lightning {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+        canvas { display: block; }
+    </style>
+</head>
+<body><div id="lightning"></div><script>
+    const lightning = document.getElementById('lightning');
+    const images = [
+      'url(https://upload.wikimedia.org/wikipedia/commons/6/6f/The_Backrooms_-_Digitally_Rendered.png)', // Replace with the actual path to your jungle image
+      'url(https://wildirishwalks.ie/wp-content/uploads/2021/06/13-rotated.jpg)', // Replace with the actual path to your metal image
+      'url(https://i.cbc.ca/1.5810174.1605898607!/fileImage/httpImage/bigfin.jpg)' // Replace with the actual path to your sea image
+    ];
+
+    function generateLightning() {
+      const duration = Math.random() * 1.0 + 0.1; // Random duration between 0.1 and 1.1 seconds
+      const delay = Math.random() * 5000 + 50; // Random delay between 50 and 5050 milliseconds
+
+      const flickerCount = Math.floor(Math.random() * 8) + 3; // Random number of flickers between 3 and 10
+      const flickerInterval = duration / flickerCount; // Interval between flickers
+
+      let flickerTimer = 0;
+      let isWhite = true;
+
+      const flickerAnimation = setInterval(() => {
+        lightning.style.backgroundImage = isWhite ? 'url(white.jpg)' : images[Math.floor(Math.random() * images.length)];
+        isWhite = !isWhite;
+        flickerTimer += flickerInterval;
+
+        if (flickerTimer >= duration) {
+          clearInterval(flickerAnimation);
+          lightning.style.backgroundImage = 'url(green.jpg)'; // Replace with the actual path to your desired image
+          setTimeout(() => {
+            lightning.style.backgroundImage = 'none';
+            generateLightning(); // Recursive call to generate the next lightning flash
+          }, duration * 5 / 13);
+        }
+      }, flickerInterval * 500);
+    }
+
+    // Start generating lightning flashes
+    generateLightning();
+  </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+    <script>
+        let scene, camera, renderer;
+        const starVertices = [];
+
+        function init() {
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.9, 500);
+            camera.position.z = 3.3;
+
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const geometry = new THREE.SphereGeometry(1, 14, 8);
+
+            const textureLoader = new THREE.TextureLoader();
+            const texture = textureLoader.load('https://i.postimg.cc/J7XyV7cH/Base-mesh-Texture.png');
+            const material = new THREE.MeshBasicMaterial({ map: texture });
+
+            const globe = new THREE.Mesh(geometry, material);
+            scene.add(globe);
+
+            const starGeo = new THREE.BufferGeometry();
+            const starMaterial = new THREE.PointsMaterial({ color: 0xfffff0 });
+
+            for (let i = 0; i < 500; i++) {
+                const x = (Math.random() - 0.5) * 500;
+                const y = (Math.random() - 0.5) * 500;
+                const z = (Math.random() - 0.5) * 500;
+                starVertices.push(x, y, z);
+            }
+
+            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 4));
+            const stars = new THREE.Points(starGeo, starMaterial);
+            scene.add(stars);
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                globe.rotation.y += 0.00093;
+
+                for (let i = 2; i < starVertices.length; i += 10) {
+                    if (starVertices[i] > -1000) {
+                        starVertices[i] -= 13;
+                    } else {
+                        starVertices[i] = 3000;
+                    }
+                }
+
+                starGeo.attributes.position.needsUpdate = true;
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        }
+
+        init();
+
+        window.addEventListener('resize', function () {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        });
+    </script>
+</body>
+</html>
+
+

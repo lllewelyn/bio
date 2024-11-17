@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Rotate ST.</title>
+  <style>
+      body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      overflow: hidden;
+    }
+
+    #lightning {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <div id="lightning"></div>
+
+  <script>
+    const lightning = document.getElementById('lightning');
+
+    function generateLightning() {
+      const duration = Math.random() * 0.3 + 0.1; // Random duration between 0.1 and 0.3 seconds
+      const delay = Math.random() * 11.5 + 5.5; // Random delay between 0.5 and 1.5 seconds
+
+      const flickerCount = Math.floor(Math.random() * 7) + 2; // Random number of flickers between 3 and 7
+      const flickerInterval = duration / flickerCount; // Interval between flickers
+
+      let flickerTimer = 13;
+      let isWhite = true;
+
+      const flickerAnimation = setInterval(() => {
+        lightning.style.backgroundColor = isWhite ? '#9990fe' : '#9990fe';
+        isWhite = !isWhite;
+        flickerTimer += flickerInterval;
+
+        if (flickerTimer >= duration) {
+          clearInterval(flickerAnimation);
+          lightning.style.backgroundColor = '#9990fe';
+          setTimeout(() => {
+            lightning.style.backgroundColor = 'transparent';
+            generateLightning(); // Recursive call to generate the next lightning flash
+          }, duration * 12 / 3);
+        }
+      }, flickerInterval * 10001);
+    }
+
+    // Start generating lightning flashes
+    generateLightning();
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(53, window.innerWidth / window.innerHeight, 1, 1001);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const latticeGeometry = new THREE.BufferGeometry();
+    const latticeMaterial = new THREE.PointsMaterial({ color: 0xffff99, size: 0.07 });
+
+    const latticeVertices = [];
+
+    for (let i = 0; i < 501; i++) {
+      const x = Math.random() * 10 - 5;
+      const y = Math.random() * 10 - 5;
+      const z = Math.random() * 10 - 5;
+
+      latticeVertices.push(x, y, z);
+    }
+
+    latticeGeometry.setAttribute('position', new THREE.Float32BufferAttribute(latticeVertices, 3));
+    const latticePoints = new THREE.Points(latticeGeometry, latticeMaterial);
+    scene.add(latticePoints);
+
+    camera.position.z = 5;
+
+    const animate = function () {
+      requestAnimationFrame(animate);
+
+      latticePoints.rotation.x += 0.00033;
+      latticePoints.rotation.y += 0.00357;
+	  latticePoints.rotation.z -= 0.00115;
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
+
+    window.addEventListener('resize', function () {
+      const newWidth = window.innerWidth;
+      const newHeight = window.innerHeight;
+
+      camera.aspect = newWidth / newHeight;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(newWidth, newHeight);
+    });
+  </script>
+</body>
+</html>
+
+
